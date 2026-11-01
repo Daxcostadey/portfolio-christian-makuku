@@ -44,7 +44,9 @@ class SupabaseStorage:
         self.base = base_url.rstrip("/") + "/storage/v1"
         self.public_base = f"{self.base}/object/public/{BUCKET}/"
         self.s = requests.Session()
-        self.s.headers.update({"Authorization": f"Bearer {service_key}", "apikey": service_key})
+        self.s.headers.update({"apikey": service_key})
+        if not service_key.startswith("sb_"):
+            self.s.headers["Authorization"] = f"Bearer {service_key}"
         self._ensure_bucket()
 
     def _ensure_bucket(self):
