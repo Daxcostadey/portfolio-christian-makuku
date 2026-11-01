@@ -1,0 +1,105 @@
+{% set cat_labels = {"affiches":"Affiches","logos":"Logos","flyers":"Flyers","brochures":"Brochures","maquettes":"Maquettes","ia":"Créations IA","autres":"Autres"} %}
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Gestion des réalisations</title>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="admin-body">
+  <header class="admin-header">
+    <div class="container header-inner">
+      <a class="brand" href="{{ url_for('index') }}"><span class="brand-mark">CM</span><span class="brand-name">Gestion des réalisations</span></a>
+      <div class="admin-actions">
+        <a class="btn btn-outline btn-sm" href="{{ url_for('realisations') }}" target="_blank" rel="noopener">Voir la page</a>
+        <form method="post" action="{{ url_for('logout') }}">
+          <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+          <button class="btn btn-ghost btn-sm" type="submit">Déconnexion</button>
+        </form>
+      </div>
+    </div>
+  </header>
+  <main class="container admin-main">
+    {% with msgs = get_flashed_messages() %}{% for m in msgs %}<p class="flash">{{ m }}</p>{% endfor %}{% endwith %}
+
+    <section class="panel">
+      <h2>Ajouter des conceptions</h2>
+      <p class="muted">Format accepté : JPEG (.jpg, .jpeg). Vous pouvez sélectionner plusieurs fichiers à la fois.</p>
+      <form class="upload-form" method="post" action="{{ url_for('upload') }}" enctype="multipart/form-data">
+        <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+        <label class="dropzone" id="dropzone">
+          <input type="file" name="images" id="fileInput" accept=".jpg,.jpeg,image/jpeg" multiple required>
+          <span class="dz-title">Glissez vos fichiers JPEG ici</span>
+          <span class="dz-sub">ou cliquez pour parcourir</span>
+          <span class="dz-count" id="dzCount"></span>
+        </label>
+        <div class="form-row">
+          <div>
+            <label for="title">Titre (facultatif)</label>
+            <input id="title" type="text" name="title" maxlength="120">
+          </div>
+          <div>
+            <label for="category">Catégorie</label>
+            <select id="category" name="category">
+              {% for c in categories %}<option value="{{ c }}">{{ cat_labels[c] }}</option>{% endfor %}
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary" type="submit">Publier</button>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2>Réalisations publiées <span class="count">{{ items|length }}</span></h2>
+      {% if not items %}
+      <p class="muted">Aucune réalisation pour le moment.</p>
+      {% endif %}
+      <div class="admin-grid">
+        {% for it in items %}
+        <div class="admin-item">
+          <img src="{{ image_url(it.thumb) }}" alt="" loading="lazy">
+          <form method="post" action="{{ url_for('update', item_id=it.id) }}" class="admin-edit">
+            <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+            <input type="text" name="title" value="{{ it.title }}" placeholder="Titre" maxlength="120">
+            <select name="category">
+              {% for c in categories %}<option value="{{ c }}" {{ 'selected' if c == it.category }}>{{ cat_labels[c] }}</option>{% endfor %}
+            </select>
+            <button class="btn btn-outline btn-sm" type="submit">Enregistrer</button>
+          </form>
+          <form method="post" action="{{ url_for('delete', item_id=it.id) }}" onsubmit="return confirm('Supprimer cette réalisation ?');">
+            <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+            <button class="btn btn-danger btn-sm" type="submit">Supprimer</button>
+          </form>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+  </main>
+  <script>
+    (function () {
+      var input = document.getElementById('fileInput');
+      var zone = document.getElementById('dropzone');
+      var count = document.getElementById('dzCount');
+      function update() {
+        var n = input.files.length;
+        count.textContent = n ? n + ' fichier(s) sélectionné(s)' : '';
+      }
+      input.addEventListener('change', update);
+      ['dragenter', 'dragover'].forEach(function (e) {
+        zone.addEventListener(e, function (ev) { ev.preventDefault(); zone.classList.add('over'); });
+      });
+      ['dragleave', 'drop'].forEach(function (e) {
+        zone.addEventListener(e, function () { zone.classList.remove('over'); });
+      });
+      zone.addEventListener('drop', function (ev) {
+        ev.preventDefault();
+        input.files = ev.dataTransfer.files;
+        update();
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero" id="accueil">
+  <div class="container hero-grid">
+    <div class="hero-text reveal">
+      <p class="eyebrow"><span class="dot"></span><span data-i18n="hero.kicker">Disponible pour de nouveaux projets</span></p>
+      <h1 class="hero-title">Christian<br>Makuku <span class="hl">Valentin</span></h1>
+      <p class="hero-role" data-i18n="hero.role">Communicateur visuel en art graphique</p>
+      <p class="hero-lead" data-i18n="hero.lead">Spécialiste en communication visuelle, je conçois des contenus créatifs et percutants pour les campagnes promotionnelles d'entreprises nationales et internationales.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="{{ url_for('realisations') }}" data-i18n="hero.cta_work">Voir mes réalisations</a>
+        <a class="btn btn-outline" href="#contact" data-i18n="hero.cta_contact">Me contacter</a>
+      </div>
+    </div>
+    <div class="hero-visual reveal">
+      <div class="photo-frame">
+        <div class="photo-bg"></div>
+        <img src="{{ url_for('static', filename='img/christian.jpg') }}" alt="Christian Makuku Valentin" width="800" height="800">
+        <div class="photo-tag">
+          <span class="tag-num">55+</span>
+          <span class="tag-label" data-i18n="stats.tools">Outils d'IA maîtrisés</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <ul class="stats reveal">
+      <li><span class="stat-num">2017</span><span class="stat-label" data-i18n="stats.since">Début de mon activité créative</span></li>
+      <li><span class="stat-num" data-i18n="stats.years_num">2 ans</span><span class="stat-label" data-i18n="stats.training">Formation en intelligence artificielle</span></li>
+      <li><span class="stat-num">55+</span><span class="stat-label" data-i18n="stats.tools">Outils d'IA maîtrisés</span></li>
+    </ul>
+  </div>
+</section>
+
+<section class="section" id="profil">
+  <div class="container profile-grid">
+    <div class="reveal">
+      <p class="section-label"><span>01</span><span data-i18n="nav.about">Profil</span></p>
+      <h2 class="section-title" data-i18n="about.title">Design, stratégie et image de marque</h2>
+    </div>
+    <div class="profile-body reveal">
+      <p data-i18n="about.p1">Visionnaire passionné par le design graphique et la stratégie de communication, je suis spécialiste en communication visuelle. Je conçois des contenus créatifs et percutants, adaptés aux campagnes promotionnelles de différentes entreprises et compagnies, tant nationales qu'internationales.</p>
+      <p data-i18n="about.p2">Je développe des stratégies de design et de communication visant à renforcer l'image de marque, accroître la visibilité et favoriser l'engagement du public. Je combine créativité, sens esthétique et maîtrise technique pour répondre efficacement aux besoins des entreprises.</p>
+      <p data-i18n="about.p3">Formé pendant deux ans à l'intelligence artificielle, j'intègre plus de 55 outils d'IA à mon processus créatif.</p>
+      <dl class="facts">
+        <div><dt data-i18n="facts.field">Domaine</dt><dd data-i18n="facts.field_v">Communication visuelle</dd></div>
+        <div><dt data-i18n="facts.location">Localisation</dt><dd>Moungali, Brazzaville</dd></div>
+        <div><dt data-i18n="facts.languages">Langues</dt><dd data-i18n="facts.languages_v">Français, Anglais</dd></div>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<section class="section section-soft" id="parcours">
+  <div class="container">
+    <div class="section-head reveal">
+      <p class="section-label"><span>02</span><span data-i18n="nav.experience">Parcours</span></p>
+      <h2 class="section-title" data-i18n="exp.title">Parcours professionnel</h2>
+    </div>
+    <ol class="timeline">
+      <li class="job reveal">
+        <div class="job-meta">
+          <span class="job-period" data-i18n="exp.j1.period">2021 — aujourd'hui</span>
+          <span class="job-company">Lilo Hotel</span>
+          <span class="job-place" data-i18n="place.kinshasa">Kinshasa, RD Congo</span>
+        </div>
+        <div class="job-body">
+          <h3 data-i18n="exp.j1.role">Manager et communicateur</h3>
+          <ul>
+            <li data-i18n="exp.j1.b1">Assurer des activités marketing et événementielles.</li>
+            <li data-i18n="exp.j1.b2">Créer et superviser les contenus visuels pour tous les départements.</li>
+            <li data-i18n="exp.j1.b3">Contrôler et diriger les équipes marketing en général.</li>
+            <li data-i18n="exp.j1.b4">Veiller à la mise en place de supports de communication.</li>
+          </ul>
+        </div>
+      </li>
+      <li class="job reveal">
+        <div class="job-meta">
+          <span class="job-period">2018</span>
+          <span class="job-company">Mygs Entreprise</span>
+          <span class="job-place" data-i18n="place.brazzaville">Brazzaville, Congo</span>
+        </div>
+        <div class="job-body">
+          <h3 data-i18n="exp.j2.role">Graphiste designer</h3>
+          <p data-i18n="exp.j2.desc">Réalisation et impression de visuels pour de grandes entreprises et compagnies brazzavilloises : affiches événementielles, brochures et impressions de grands panneaux publicitaires.</p>
+        </div>
+      </li>
+      <li class="job reveal">
+        <div class="job-meta">
+          <span class="job-period">2017</span>
+          <span class="job-company">Daxcosta Company</span>
+          <span class="job-place" data-i18n="place.kinshasa">Kinshasa, RD Congo</span>
+        </div>
+        <div class="job-body">
+          <h3 data-i18n="exp.j3.role">Fondateur et directeur créatif</h3>
+          <ul>
+            <li data-i18n="exp.j3.b1">Création de visuels (flyers, logos, affiches, brochures, maquettes, etc.).</li>
+            <li data-i18n="exp.j3.b2">Élaboration de stratégies de communication pour des marques, événements et projets culturels.</li>
+            <li data-i18n="exp.j3.b3">Gestion de la relation client et pilotage des projets visuels.</li>
+            <li data-i18n="exp.j3.b4">Partenariats avec des entreprises locales (ONG, startups, institutions).</li>
+          </ul>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="section ai-section" id="ia">
+  <div class="container ai-grid">
+    <div class="reveal">
+      <p class="section-label light"><span>03</span><span data-i18n="ai.label">Intelligence artificielle</span></p>
+      <h2 class="section-title" data-i18n="ai.title">La créativité augmentée par l'IA</h2>
+      <p class="ai-lead" data-i18n="ai.lead">Deux années de formation en intelligence artificielle et la maîtrise de plus de 55 outils d'IA viennent renforcer mon expertise en communication visuelle, de la création graphique à la vidéo et à la stratégie de communication.</p>
+    </div>
+    <div class="ai-cards reveal">
+      <div class="ai-card">
+        <span class="ai-num" data-i18n="stats.years_num">2 ans</span>
+        <span class="ai-text" data-i18n="ai.card1">de formation en intelligence artificielle</span>
+      </div>
+      <div class="ai-card accent">
+        <span class="ai-num">55+</span>
+        <span class="ai-text" data-i18n="ai.card2">outils d'IA maîtrisés et appliqués à la création</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="competences">
+  <div class="container">
+    <div class="section-head reveal">
+      <p class="section-label"><span>04</span><span data-i18n="nav.skills">Compétences</span></p>
+      <h2 class="section-title" data-i18n="skills.title">Savoir-faire et outils</h2>
+    </div>
+    <div class="skills-grid">
+      <div class="skills-col reveal">
+        <h3 class="col-title" data-i18n="skills.tools">Logiciels et outils</h3>
+        <ul class="bars">
+          <li><span class="bar-name">Adobe Photoshop</span><span class="bar"><span style="--w:88%"></span></span></li>
+          <li><span class="bar-name" data-i18n="skills.photo">Photographie</span><span class="bar"><span style="--w:82%"></span></span></li>
+          <li><span class="bar-name">Microsoft Word</span><span class="bar"><span style="--w:78%"></span></span></li>
+          <li><span class="bar-name">Adobe Premiere Pro</span><span class="bar"><span style="--w:76%"></span></span></li>
+          <li><span class="bar-name">Adobe Illustrator</span><span class="bar"><span style="--w:72%"></span></span></li>
+          <li><span class="bar-name">Adobe InDesign</span><span class="bar"><span style="--w:70%"></span></span></li>
+          <li><span class="bar-name">Figma</span><span class="bar"><span style="--w:70%"></span></span></li>
+        </ul>
+      </div>
+      <div class="skills-col reveal">
+        <h3 class="col-title" data-i18n="skills.expertise">Domaines d'expertise</h3>
+        <ul class="chips">
+          <li data-i18n="exp_area.1">Design graphique</li>
+          <li data-i18n="exp_area.2">Stratégie de communication</li>
+          <li data-i18n="exp_area.3">Image de marque</li>
+          <li data-i18n="exp_area.4">Marketing et événementiel</li>
+          <li data-i18n="exp_area.5">Direction créative</li>
+          <li data-i18n="exp_area.6">Impression grand format</li>
+          <li data-i18n="exp_area.7">Montage vidéo</li>
+          <li data-i18n="exp_area.8">Création assistée par IA</li>
+        </ul>
+        <h3 class="col-title" data-i18n="facts.languages">Langues</h3>
+        <ul class="bars">
+          <li><span class="bar-name"><span data-i18n="lang.fr">Français</span> <em data-i18n="lang.fluent">Courant</em></span><span class="bar"><span style="--w:95%"></span></span></li>
+          <li><span class="bar-name"><span data-i18n="lang.en">Anglais</span> <em data-i18n="lang.basic">Notions</em></span><span class="bar"><span style="--w:35%"></span></span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-soft" id="formation">
+  <div class="container">
+    <div class="section-head reveal">
+      <p class="section-label"><span>05</span><span data-i18n="nav.education">Formation</span></p>
+      <h2 class="section-title" data-i18n="edu.title">Formation</h2>
+    </div>
+    <div class="edu-grid">
+      <article class="edu-card reveal">
+        <span class="edu-period" data-i18n="edu.ai.period">2 ans</span>
+        <h3 data-i18n="edu.ai.title">Formation en intelligence artificielle</h3>
+        <p data-i18n="edu.ai.desc">Maîtrise de plus de 55 outils d'IA</p>
+      </article>
+      <article class="edu-card reveal">
+        <span class="edu-period" data-i18n="edu.uni.period">Niveau Bac+2</span>
+        <h3 data-i18n="edu.uni.title">Études en communication visuelle</h3>
+        <p data-i18n="edu.uni.school">Académie des Beaux-Arts de Kinshasa</p>
+      </article>
+      <article class="edu-card reveal">
+        <span class="edu-period">2018 — 2019</span>
+        <h3 data-i18n="edu.hs.title">Diplôme d'État (Biologie – Chimie)</h3>
+        <p>Complexe Scolaire Sedia Sapo, Kinshasa</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="recent">
+  <div class="container">
+    <div class="section-head split reveal">
+      <div>
+        <p class="section-label"><span>06</span><span data-i18n="nav.work">Réalisations</span></p>
+        <h2 class="section-title" data-i18n="work.recent">Réalisations récentes</h2>
+      </div>
+      <a class="btn btn-outline" href="{{ url_for('realisations') }}" data-i18n="work.view_all">Voir toutes les réalisations</a>
+    </div>
+    <div class="gallery gallery-preview" id="recentGallery" data-api="{{ url_for('api_realisations') }}"></div>
+    <p class="empty" id="recentEmpty" hidden data-i18n="work.empty">Les réalisations seront publiées ici très prochainement.</p>
+  </div>
+</section>
+
+<section class="section contact-section" id="contact">
+  <div class="container contact-grid">
+    <div class="reveal">
+      <p class="section-label"><span>07</span><span data-i18n="nav.contact">Contact</span></p>
+      <h2 class="section-title" data-i18n="contact.title">Travaillons ensemble</h2>
+      <p class="contact-lead" data-i18n="contact.lead">Pour un projet de design, une campagne ou une identité de marque, contactez-moi directement.</p>
+      <a class="btn btn-primary" href="mailto:daxcosta244@gmail.com" data-i18n="contact.cta">Écrivez-moi</a>
+    </div>
+    <ul class="contact-list reveal">
+      <li><span class="c-label" data-i18n="contact.phone">Téléphone</span><a href="tel:+242050109403">+242 05 010 94 03</a></li>
+      <li><span class="c-label" data-i18n="contact.email">E-mail</span><a href="mailto:daxcosta244@gmail.com">daxcosta244@gmail.com</a></li>
+      <li><span class="c-label" data-i18n="contact.address">Adresse</span><span>Rue Lagué N°66, Moungali, Brazzaville</span></li>
+    </ul>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/gallery.js') }}"></script>
+{% endblock %}

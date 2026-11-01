@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title_key %}meta.title_work{% endblock %}
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <p class="section-label"><span>CM</span><span data-i18n="nav.work">Réalisations</span></p>
+    <h1 class="page-title" data-i18n="work.title">Mes réalisations</h1>
+    <p class="page-lead" data-i18n="work.lead">Une sélection de mes conceptions graphiques : affiches, logos, flyers, brochures et maquettes.</p>
+  </div>
+</section>
+<section class="section section-tight">
+  <div class="container">
+    {% if items %}
+    {% if categories|length > 1 %}
+    <div class="filters" role="tablist">
+      <button type="button" class="filter active" data-filter="all" data-i18n="work.all">Tout</button>
+      {% for c in categories %}
+      <button type="button" class="filter" data-filter="{{ c }}" data-i18n="cat.{{ c }}">{{ c }}</button>
+      {% endfor %}
+    </div>
+    {% endif %}
+    <div class="gallery" id="gallery">
+      {% for it in items %}
+      <figure class="tile" data-category="{{ it.category }}" data-full="{{ image_url(it.file) }}" data-title="{{ it.title }}">
+        <button type="button" class="tile-btn">
+          <img src="{{ image_url(it.thumb) }}" alt="{{ it.title or 'Christian Makuku Valentin' }}" loading="lazy" width="{{ it.width }}" height="{{ it.height }}">
+        </button>
+        <figcaption>
+          {% if it.title %}<span class="tile-title">{{ it.title }}</span>{% endif %}
+          <span class="tile-cat" data-i18n="cat.{{ it.category }}">{{ it.category }}</span>
+        </figcaption>
+      </figure>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <p data-i18n="work.empty">Les réalisations seront publiées ici très prochainement.</p>
+      <a class="btn btn-outline" href="{{ url_for('index') }}#contact" data-i18n="hero.cta_contact">Me contacter</a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/gallery.js') }}"></script>
+{% endblock %}

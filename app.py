@@ -1,0 +1,221 @@
+import os
+import secrets
+import threading
+import uuid
+from datetime import datetime, timezone
+from functools import wraps
+from io import BytesIO
+
+from flask import (
+    Flask, abort, flash, jsonify, redirect, render_template, request,
+    send_from_directory, session, url_for,
+)
+from PIL import Image, ImageOps
+
+from storage import LocalStorage, get_storage
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+CATEGORIES = ["affiches", "logos", "flyers", "brochures", "maquettes", "ia", "autres"]
+MAX_SIDE = 2400
+THUMB_SIDE = 900
+
+app = Flask(__name__)
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
+app.config["MAX_CONTENT_LENGTH"] = 60 * 1024 * 1024
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
+
+storage = get_storage(BASE_DIR)
+_lock = threading.Lock()
+
+
+def load_items():
+    return storage.load_items()
+
+
+def save_items(items):
+    storage.save_items(items)
+
+
+def jpeg_bytes(img, quality):
+    buf = BytesIO()
+    img.save(buf, "JPEG", quality=quality, optimize=True, progressive=True)
+    return buf.getvalue()
+
+
+app.jinja_env.globals["image_url"] = storage.url
+
+
+def csrf_token():
+    if "csrf" not in session:
+        session["csrf"] = secrets.token_urlsafe(32)
+    return session["csrf"]
+
+
+app.jinja_env.globals["csrf_token"] = csrf_token
+
+
+def check_csrf():
+    sent = request.form.get("csrf") or request.headers.get("X-CSRF-Token")
+    if not sent or not secrets.compare_digest(sent, session.get("csrf", "")):
+        abort(400)
+
+
+def login_required(view):
+    @wraps(view)
+    def wrapper(*args, **kwargs):
+        if not session.get("admin"):
+            return redirect(url_for("login"))
+        return view(*args, **kwargs)
+    return wrapper
+
+
+def process_jpeg(raw):
+    if not raw.startswith(b"\xff\xd8\xff"):
+        raise ValueError("not a jpeg")
+    Image.open(BytesIO(raw)).verify()
+    img = ImageOps.exif_transpose(Image.open(BytesIO(raw))).convert("RGB")
+    full = img.copy()
+    full.thumbnail((MAX_SIDE, MAX_SIDE), Image.LANCZOS)
+    thumb = img.copy()
+    thumb.thumbnail((THUMB_SIDE, THUMB_SIDE), Image.LANCZOS)
+    return full, thumb
+
+
+@app.route("/")
+def index():
+    return render_template("index.html", page="home")
+
+
+@app.route("/realisations")
+def realisations():
+    items = load_items()
+    used = [c for c in CATEGORIES if any(i["category"] == c for i in items)]
+    return render_template("realisations.html", page="work", items=items, categories=used)
+
+
+@app.route("/uploads/<path:name>")
+def uploaded(name):
+    if not isinstance(storage, LocalStorage):
+        abort(404)
+    return send_from_directory(storage.upload_dir, name, max_age=60 * 60 * 24 * 30)
+
+
+@app.route("/admin/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        check_csrf()
+        pwd = request.form.get("password", "")
+        if ADMIN_PASSWORD and secrets.compare_digest(pwd, ADMIN_PASSWORD):
+            session.clear()
+            session["admin"] = True
+            return redirect(url_for("admin"))
+        flash("Mot de passe incorrect.")
+    return render_template("login.html", configured=bool(ADMIN_PASSWORD))
+
+
+@app.route("/admin/logout", methods=["POST"])
+def logout():
+    check_csrf()
+    session.clear()
+    return redirect(url_for("index"))
+
+
+@app.route("/admin")
+@login_required
+def admin():
+    return render_template("admin.html", items=load_items(), categories=CATEGORIES)
+
+
+@app.route("/admin/upload", methods=["POST"])
+@login_required
+def upload():
+    check_csrf()
+    category = request.form.get("category", "autres")
+    if category not in CATEGORIES:
+        category = "autres"
+    title = request.form.get("title", "").strip()[:120]
+    files = request.files.getlist("images")
+    added, rejected = 0, []
+    new_items = []
+    for f in files:
+        if not f or not f.filename:
+            continue
+        try:
+            full, thumb = process_jpeg(f.read())
+        except Exception:
+            rejected.append(f.filename)
+            continue
+        uid = uuid.uuid4().hex
+        storage.put_image(f"{uid}.jpg", jpeg_bytes(full, 88))
+        storage.put_image(f"{uid}_t.jpg", jpeg_bytes(thumb, 82))
+        new_items.append({
+            "id": uid,
+            "file": f"{uid}.jpg",
+            "thumb": f"{uid}_t.jpg",
+            "title": title,
+            "category": category,
+            "width": full.width,
+            "height": full.height,
+            "created": datetime.now(timezone.utc).isoformat(),
+        })
+        added += 1
+    if new_items:
+        with _lock:
+            items = load_items()
+            save_items(new_items + items)
+    if added:
+        flash(f"{added} image(s) ajoutée(s).")
+    if rejected:
+        flash("Fichiers refusés (JPEG uniquement) : " + ", ".join(rejected))
+    return redirect(url_for("admin"))
+
+
+@app.route("/admin/update/<item_id>", methods=["POST"])
+@login_required
+def update(item_id):
+    check_csrf()
+    with _lock:
+        items = load_items()
+        for it in items:
+            if it["id"] == item_id:
+                it["title"] = request.form.get("title", "").strip()[:120]
+                cat = request.form.get("category", it["category"])
+                it["category"] = cat if cat in CATEGORIES else it["category"]
+                break
+        save_items(items)
+    flash("Réalisation mise à jour.")
+    return redirect(url_for("admin"))
+
+
+@app.route("/admin/delete/<item_id>", methods=["POST"])
+@login_required
+def delete(item_id):
+    check_csrf()
+    with _lock:
+        items = load_items()
+        keep = []
+        for it in items:
+            if it["id"] == item_id:
+                for key in ("file", "thumb"):
+                    storage.delete_image(it[key])
+            else:
+                keep.append(it)
+        save_items(keep)
+    flash("Réalisation supprimée.")
+    return redirect(url_for("admin"))
+
+
+@app.route("/api/realisations")
+def api_realisations():
+    items = load_items()
+    return jsonify([dict(it, url=storage.url(it["file"]), thumb_url=storage.url(it["thumb"])) for it in items])
+
+
+@app.errorhandler(413)
+def too_large(_):
+    flash("Envoi trop volumineux (60 Mo maximum par envoi).")
+    return redirect(url_for("admin"))
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=False)

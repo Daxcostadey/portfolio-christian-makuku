@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title data-i18n="{% block title_key %}meta.title{% endblock %}">Christian Makuku Valentin</title>
+  <meta name="description" content="Christian Makuku Valentin — Communicateur visuel en art graphique, Brazzaville / Kinshasa.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body data-page="{{ page }}">
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="{{ url_for('index') }}">
+        <span class="brand-mark">CM</span>
+        <span class="brand-name">Christian Makuku</span>
+      </a>
+      <nav class="nav" id="nav">
+        <a href="{{ url_for('index') }}#profil" data-i18n="nav.about">Profil</a>
+        <a href="{{ url_for('index') }}#parcours" data-i18n="nav.experience">Parcours</a>
+        <a href="{{ url_for('index') }}#competences" data-i18n="nav.skills">Compétences</a>
+        <a href="{{ url_for('index') }}#formation" data-i18n="nav.education">Formation</a>
+        <a href="{{ url_for('realisations') }}" class="{{ 'active' if page == 'work' }}" data-i18n="nav.work">Réalisations</a>
+        <a href="{{ url_for('index') }}#contact" class="nav-cta" data-i18n="nav.contact">Contact</a>
+      </nav>
+      <div class="header-tools">
+        <div class="lang-switch" role="group" aria-label="Langue">
+          <button type="button" data-lang="fr">FR</button>
+          <button type="button" data-lang="en">EN</button>
+          <button type="button" data-lang="sw">SW</button>
+        </div>
+        <button type="button" class="menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="nav" data-i18n="nav.menu">Menu</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <p class="footer-name">Christian Makuku Valentin</p>
+        <p class="footer-role" data-i18n="hero.role">Communicateur visuel en art graphique</p>
+      </div>
+      <div class="footer-links">
+        <a href="mailto:daxcosta244@gmail.com">daxcosta244@gmail.com</a>
+        <a href="tel:+242050109403">+242 05 010 94 03</a>
+      </div>
+      <p class="footer-copy">&copy; <span id="year">2026</span> Christian Makuku Valentin. <span data-i18n="footer.rights">Tous droits réservés.</span></p>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/i18n.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

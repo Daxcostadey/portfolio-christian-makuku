@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Connexion — Espace réalisations</title>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="admin-body">
+  <main class="login-wrap">
+    <form class="login-card" method="post">
+      <span class="brand-mark">CM</span>
+      <h1>Espace réalisations</h1>
+      <p class="muted">Connectez-vous pour publier vos conceptions JPEG.</p>
+      {% with msgs = get_flashed_messages() %}{% for m in msgs %}<p class="flash">{{ m }}</p>{% endfor %}{% endwith %}
+      {% if not configured %}
+      <p class="flash">Aucun mot de passe n'est configuré. Définissez la variable d'environnement ADMIN_PASSWORD puis redémarrez le serveur.</p>
+      {% endif %}
+      <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+      <label for="password">Mot de passe</label>
+      <input id="password" type="password" name="password" required autofocus>
+      <button class="btn btn-primary" type="submit">Se connecter</button>
+      <a class="muted small" href="{{ url_for('index') }}">Retour au site</a>
+    </form>
+  </main>
+</body>
+</html>
