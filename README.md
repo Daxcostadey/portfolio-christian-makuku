@@ -34,10 +34,13 @@ Variables d'environnement :
 | --- | --- |
 | `ADMIN_PASSWORD` | Mot de passe de l'espace `/admin` (obligatoire) |
 | `SECRET_KEY` | Clé de session (obligatoire en production) |
-| `UPLOAD_DIR` | Dossier des images (par défaut `uploads/`) |
-| `DATA_FILE` | Fichier de la liste des réalisations (par défaut `data/realisations.json`) |
+| `SUPABASE_URL` | Project URL Supabase (active le stockage cloud) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Clé `service_role` Supabase (secrète, jamais dans le code) |
+| `SUPABASE_BUCKET` | Nom du bucket (par défaut `realisations`, créé automatiquement en public) |
+| `UPLOAD_DIR` | Dossier des images en mode local (par défaut `uploads/`) |
+| `DATA_FILE` | Liste des réalisations en mode local (par défaut `data/realisations.json`) |
 
-Les images et la liste des réalisations sont stockées sur le disque : chez l'hébergeur, utilisez un disque persistant et faites pointer `UPLOAD_DIR` et `DATA_FILE` dessus.
+Stockage : si `SUPABASE_URL` et `SUPABASE_SERVICE_ROLE_KEY` sont définies, les JPEG et la liste des réalisations (`data/realisations.json`) sont enregistrés dans Supabase Storage, ce qui permet un hébergement sans disque persistant (Render gratuit via `render.yaml`). Sinon, tout est stocké sur le disque local.
 
 ## Modifier les textes
 
