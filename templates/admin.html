@@ -100,6 +100,18 @@
         update();
       });
 
+      try {
+        var saved = JSON.parse(sessionStorage.getItem('uploadMsgs') || '[]');
+        sessionStorage.removeItem('uploadMsgs');
+        var main = document.querySelector('.admin-main');
+        saved.reverse().forEach(function (m) {
+          var el = document.createElement('p');
+          el.className = 'flash';
+          el.textContent = m;
+          main.insertBefore(el, main.firstChild);
+        });
+      } catch (e) {}
+
       var form = document.getElementById('uploadForm');
       var btn = document.getElementById('uploadBtn');
       var MAX_BYTES = 4 * 1024 * 1024;
@@ -127,10 +139,17 @@
         if (!window.fetch || !input.files.length) return;
         ev.preventDefault();
         var files = Array.prototype.slice.call(input.files);
-        var done = 0;
+        var done = 0, added = 0, rejected = [];
         btn.disabled = true;
         function next() {
-          if (!files.length) { location.href = form.action.replace(/\/upload$/, ''); return; }
+          if (!files.length) {
+            var msgs = [];
+            if (added) msgs.push(added + ' image(s) ajoutée(s).');
+            if (rejected.length) msgs.push('Fichiers refusés (JPEG uniquement) : ' + rejected.join(', '));
+            try { sessionStorage.setItem('uploadMsgs', JSON.stringify(msgs)); } catch (e) {}
+            location.href = form.action.replace(/\/upload$/, '');
+            return;
+          }
           var file = files.shift();
           btn.textContent = 'Envoi ' + (done + 1) + ' / ' + (done + files.length + 1) + '...';
           shrink(file).then(function (f) {
@@ -139,8 +158,15 @@
             data.append('title', form.elements.title.value);
             data.append('category', form.elements.category.value);
             data.append('images', f, f.name);
-            return fetch(form.action, { method: 'POST', body: data, credentials: 'same-origin' });
-          }).catch(function () {}).then(function () { done++; next(); });
+            return fetch(form.action, { method: 'POST', body: data, credentials: 'same-origin', headers: { 'X-Requested-With': 'fetch' } });
+          }).then(function (r) { return r.ok ? r.json() : { added: 0, rejected: [file.name] }; })
+            .catch(function () { return { added: 0, rejected: [file.name] }; })
+            .then(function (res) {
+              added += res.added || 0;
+              rejected = rejected.concat(res.rejected || []);
+              done++;
+              next();
+            });
         }
         next();
       });

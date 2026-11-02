@@ -163,6 +163,8 @@ def upload():
         with _lock:
             items = load_items()
             save_items(new_items + items)
+    if request.headers.get("X-Requested-With") == "fetch":
+        return jsonify(added=added, rejected=rejected)
     if added:
         flash(f"{added} image(s) ajoutée(s).")
     if rejected:
