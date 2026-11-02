@@ -86,8 +86,17 @@ class SupabaseStorage:
         return self.public_base + name
 
 
+def supabase_url(value):
+    value = (value or "").strip().rstrip("/")
+    if value and "://" not in value and "." not in value:
+        value = f"https://{value}.supabase.co"
+    elif value and "://" not in value:
+        value = "https://" + value
+    return value
+
+
 def get_storage(base_dir):
-    url = os.environ.get("SUPABASE_URL")
+    url = supabase_url(os.environ.get("SUPABASE_URL"))
     key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
     if url and key:
         return SupabaseStorage(url, key)
