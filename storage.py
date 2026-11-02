@@ -14,17 +14,30 @@ class LocalStorage:
         os.makedirs(upload_dir, exist_ok=True)
         os.makedirs(os.path.dirname(data_file), exist_ok=True)
 
-    def load_items(self):
-        if not os.path.exists(self.data_file):
-            return []
-        with open(self.data_file, encoding="utf-8") as f:
+    def _doc_path(self, name):
+        if name == INDEX_NAME:
+            return self.data_file
+        return os.path.join(os.path.dirname(self.data_file), os.path.basename(name))
+
+    def load_doc(self, name, default):
+        path = self._doc_path(name)
+        if not os.path.exists(path):
+            return default
+        with open(path, encoding="utf-8") as f:
             return json.load(f)
 
-    def save_items(self, items):
-        tmp = self.data_file + ".tmp"
+    def save_doc(self, name, data):
+        path = self._doc_path(name)
+        tmp = path + ".tmp"
         with open(tmp, "w", encoding="utf-8") as f:
-            json.dump(items, f, ensure_ascii=False, indent=2)
-        os.replace(tmp, self.data_file)
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        os.replace(tmp, path)
+
+    def load_items(self):
+        return self.load_doc(INDEX_NAME, [])
+
+    def save_items(self, items):
+        self.save_doc(INDEX_NAME, items)
 
     def put_image(self, name, data):
         with open(os.path.join(self.upload_dir, name), "wb") as f:
@@ -66,15 +79,21 @@ class SupabaseStorage:
         }, timeout=60)
         r.raise_for_status()
 
-    def load_items(self):
-        r = self.s.get(f"{self.base}/object/authenticated/{BUCKET}/{INDEX_NAME}", timeout=20)
+    def load_doc(self, name, default):
+        r = self.s.get(f"{self.base}/object/authenticated/{BUCKET}/{name}", timeout=20)
         if r.status_code in (400, 404):
-            return []
+            return default
         r.raise_for_status()
         return r.json()
 
+    def save_doc(self, name, data):
+        self._put(name, json.dumps(data, ensure_ascii=False).encode("utf-8"), "application/json", cache="0")
+
+    def load_items(self):
+        return self.load_doc(INDEX_NAME, [])
+
     def save_items(self, items):
-        self._put(INDEX_NAME, json.dumps(items, ensure_ascii=False).encode("utf-8"), "application/json", cache="0")
+        self.save_doc(INDEX_NAME, items)
 
     def put_image(self, name, data):
         self._put(name, data, "image/jpeg")

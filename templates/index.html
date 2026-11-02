@@ -1,10 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
+{% set ns = namespace(n=0) %}
 <section class="hero" id="accueil">
   <div class="container hero-grid">
     <div class="hero-text reveal">
       <p class="eyebrow"><span class="dot"></span><span data-i18n="hero.kicker">Disponible pour de nouveaux projets</span></p>
-      <h1 class="hero-title">Christian<br>Makuku <span class="hl">Valentin</span></h1>
+      {% set words = profile.name.split() %}
+      <h1 class="hero-title">{% if words|length > 2 %}{{ words[0] }}<br>{{ words[1:-1]|join(" ") }} <span class="hl">{{ words[-1] }}</span>{% elif words|length == 2 %}{{ words[0] }} <span class="hl">{{ words[1] }}</span>{% else %}<span class="hl">{{ profile.name }}</span>{% endif %}</h1>
       <p class="hero-role" data-i18n="hero.role">Communicateur visuel en art graphique</p>
       <p class="hero-lead" data-i18n="hero.lead">Spécialiste en communication visuelle, je conçois des contenus créatifs et percutants pour les campagnes promotionnelles d'entreprises nationales et internationales.</p>
       <div class="hero-actions">
@@ -15,9 +17,9 @@
     <div class="hero-visual reveal">
       <div class="photo-frame">
         <div class="photo-bg"></div>
-        <img src="{{ url_for('static', filename='img/christian.jpg') }}" alt="Christian Makuku Valentin" width="800" height="800">
+        <img src="{{ photo_url }}" alt="{{ profile.name }}" width="800" height="800">
         <div class="photo-tag">
-          <span class="tag-num">55+</span>
+          <span class="tag-num">{{ profile.ai_tools }}</span>
           <span class="tag-label" data-i18n="stats.tools">Outils d'IA maîtrisés</span>
         </div>
       </div>
@@ -25,17 +27,18 @@
   </div>
   <div class="container">
     <ul class="stats reveal">
-      <li><span class="stat-num">2017</span><span class="stat-label" data-i18n="stats.since">Début de mon activité créative</span></li>
+      <li><span class="stat-num">{{ profile.since }}</span><span class="stat-label" data-i18n="stats.since">Début de mon activité créative</span></li>
       <li><span class="stat-num" data-i18n="stats.years_num">2 ans</span><span class="stat-label" data-i18n="stats.training">Formation en intelligence artificielle</span></li>
-      <li><span class="stat-num">55+</span><span class="stat-label" data-i18n="stats.tools">Outils d'IA maîtrisés</span></li>
+      <li><span class="stat-num">{{ profile.ai_tools }}</span><span class="stat-label" data-i18n="stats.tools">Outils d'IA maîtrisés</span></li>
     </ul>
   </div>
 </section>
 
+{% if show.profil %}
 <section class="section" id="profil">
   <div class="container profile-grid">
     <div class="reveal">
-      <p class="section-label"><span>01</span><span data-i18n="nav.about">Profil</span></p>
+      {% set ns.n = ns.n + 1 %}<p class="section-label"><span>{{ "%02d"|format(ns.n) }}</span><span data-i18n="nav.about">Profil</span></p>
       <h2 class="section-title" data-i18n="about.title">Design, stratégie et image de marque</h2>
     </div>
     <div class="profile-body reveal">
@@ -44,17 +47,19 @@
       <p data-i18n="about.p3">Formé pendant deux ans à l'intelligence artificielle, j'intègre plus de 55 outils d'IA à mon processus créatif.</p>
       <dl class="facts">
         <div><dt data-i18n="facts.field">Domaine</dt><dd data-i18n="facts.field_v">Communication visuelle</dd></div>
-        <div><dt data-i18n="facts.location">Localisation</dt><dd>Moungali, Brazzaville</dd></div>
+        <div><dt data-i18n="facts.location">Localisation</dt><dd>{{ profile.location }}</dd></div>
         <div><dt data-i18n="facts.languages">Langues</dt><dd data-i18n="facts.languages_v">Français, Anglais</dd></div>
       </dl>
     </div>
   </div>
 </section>
+{% endif %}
 
+{% if show.parcours %}
 <section class="section section-soft" id="parcours">
   <div class="container">
     <div class="section-head reveal">
-      <p class="section-label"><span>02</span><span data-i18n="nav.experience">Parcours</span></p>
+      {% set ns.n = ns.n + 1 %}<p class="section-label"><span>{{ "%02d"|format(ns.n) }}</span><span data-i18n="nav.experience">Parcours</span></p>
       <h2 class="section-title" data-i18n="exp.title">Parcours professionnel</h2>
     </div>
     <ol class="timeline">
@@ -104,11 +109,13 @@
     </ol>
   </div>
 </section>
+{% endif %}
 
+{% if show.ia %}
 <section class="section ai-section" id="ia">
   <div class="container ai-grid">
     <div class="reveal">
-      <p class="section-label light"><span>03</span><span data-i18n="ai.label">Intelligence artificielle</span></p>
+      {% set ns.n = ns.n + 1 %}<p class="section-label light"><span>{{ "%02d"|format(ns.n) }}</span><span data-i18n="ai.label">Intelligence artificielle</span></p>
       <h2 class="section-title" data-i18n="ai.title">La créativité augmentée par l'IA</h2>
       <p class="ai-lead" data-i18n="ai.lead">Deux années de formation en intelligence artificielle et la maîtrise de plus de 55 outils d'IA viennent renforcer mon expertise en communication visuelle, de la création graphique à la vidéo et à la stratégie de communication.</p>
     </div>
@@ -118,17 +125,19 @@
         <span class="ai-text" data-i18n="ai.card1">de formation en intelligence artificielle</span>
       </div>
       <div class="ai-card accent">
-        <span class="ai-num">55+</span>
+        <span class="ai-num">{{ profile.ai_tools }}</span>
         <span class="ai-text" data-i18n="ai.card2">outils d'IA maîtrisés et appliqués à la création</span>
       </div>
     </div>
   </div>
 </section>
+{% endif %}
 
+{% if show.competences %}
 <section class="section" id="competences">
   <div class="container">
     <div class="section-head reveal">
-      <p class="section-label"><span>04</span><span data-i18n="nav.skills">Compétences</span></p>
+      {% set ns.n = ns.n + 1 %}<p class="section-label"><span>{{ "%02d"|format(ns.n) }}</span><span data-i18n="nav.skills">Compétences</span></p>
       <h2 class="section-title" data-i18n="skills.title">Savoir-faire et outils</h2>
     </div>
     <div class="skills-grid">
@@ -165,11 +174,13 @@
     </div>
   </div>
 </section>
+{% endif %}
 
+{% if show.formation %}
 <section class="section section-soft" id="formation">
   <div class="container">
     <div class="section-head reveal">
-      <p class="section-label"><span>05</span><span data-i18n="nav.education">Formation</span></p>
+      {% set ns.n = ns.n + 1 %}<p class="section-label"><span>{{ "%02d"|format(ns.n) }}</span><span data-i18n="nav.education">Formation</span></p>
       <h2 class="section-title" data-i18n="edu.title">Formation</h2>
     </div>
     <div class="edu-grid">
@@ -191,12 +202,14 @@
     </div>
   </div>
 </section>
+{% endif %}
 
+{% if show.recent %}
 <section class="section" id="recent">
   <div class="container">
     <div class="section-head split reveal">
       <div>
-        <p class="section-label"><span>06</span><span data-i18n="nav.work">Réalisations</span></p>
+        {% set ns.n = ns.n + 1 %}<p class="section-label"><span>{{ "%02d"|format(ns.n) }}</span><span data-i18n="nav.work">Réalisations</span></p>
         <h2 class="section-title" data-i18n="work.recent">Réalisations récentes</h2>
       </div>
       <a class="btn btn-outline" href="{{ url_for('realisations') }}" data-i18n="work.view_all">Voir toutes les réalisations</a>
@@ -205,22 +218,25 @@
     <p class="empty" id="recentEmpty" hidden data-i18n="work.empty">Les réalisations seront publiées ici très prochainement.</p>
   </div>
 </section>
+{% endif %}
 
+{% if show.contact %}
 <section class="section contact-section" id="contact">
   <div class="container contact-grid">
     <div class="reveal">
-      <p class="section-label"><span>07</span><span data-i18n="nav.contact">Contact</span></p>
+      {% set ns.n = ns.n + 1 %}<p class="section-label"><span>{{ "%02d"|format(ns.n) }}</span><span data-i18n="nav.contact">Contact</span></p>
       <h2 class="section-title" data-i18n="contact.title">Travaillons ensemble</h2>
       <p class="contact-lead" data-i18n="contact.lead">Pour un projet de design, une campagne ou une identité de marque, contactez-moi directement.</p>
-      <a class="btn btn-primary" href="mailto:daxcosta244@gmail.com" data-i18n="contact.cta">Écrivez-moi</a>
+      <a class="btn btn-primary" href="mailto:{{ profile.email }}" data-i18n="contact.cta">Écrivez-moi</a>
     </div>
     <ul class="contact-list reveal">
-      <li><span class="c-label" data-i18n="contact.phone">Téléphone</span><a href="tel:+242050109403">+242 05 010 94 03</a></li>
-      <li><span class="c-label" data-i18n="contact.email">E-mail</span><a href="mailto:daxcosta244@gmail.com">daxcosta244@gmail.com</a></li>
-      <li><span class="c-label" data-i18n="contact.address">Adresse</span><span>Rue Lagué N°66, Moungali, Brazzaville</span></li>
+      <li><span class="c-label" data-i18n="contact.phone">Téléphone</span><a href="{{ tel_href }}">{{ profile.phone }}</a></li>
+      <li><span class="c-label" data-i18n="contact.email">E-mail</span><a href="mailto:{{ profile.email }}">{{ profile.email }}</a></li>
+      <li><span class="c-label" data-i18n="contact.address">Adresse</span><span>{{ profile.address }}</span></li>
     </ul>
   </div>
 </section>
+{% endif %}
 {% endblock %}
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/gallery.js') }}"></script>

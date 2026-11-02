@@ -1,6 +1,8 @@
+import copy
 import os
 import secrets
 import threading
+import time
 import uuid
 from datetime import datetime, timezone
 from functools import wraps
@@ -12,6 +14,7 @@ from flask import (
 )
 from PIL import Image, ImageOps
 
+import settings as cfg
 from storage import LocalStorage, get_storage
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -43,6 +46,42 @@ def jpeg_bytes(img, quality):
 
 
 app.jinja_env.globals["image_url"] = storage.url
+
+
+_settings_cache = {"at": 0.0, "data": None}
+SETTINGS_TTL = 15
+
+
+def load_settings(fresh=False):
+    now = time.monotonic()
+    if fresh or _settings_cache["data"] is None or now - _settings_cache["at"] > SETTINGS_TTL:
+        _settings_cache["data"] = storage.load_doc(cfg.SETTINGS_NAME, {})
+        _settings_cache["at"] = now
+    return cfg.merge(copy.deepcopy(_settings_cache["data"]))
+
+
+def save_settings(data):
+    storage.save_doc(cfg.SETTINGS_NAME, data)
+    _settings_cache["data"] = copy.deepcopy(data)
+    _settings_cache["at"] = time.monotonic()
+
+
+@app.context_processor
+def inject_site():
+    if request.endpoint in ("static", "uploaded") or request.path.startswith("/api/"):
+        return {}
+    site = load_settings()
+    prof = site["profile"]
+    return {
+        "site": site,
+        "profile": prof,
+        "show": site["sections"],
+        "photo_url": storage.url(prof["photo"]) if prof["photo"] else url_for("static", filename="img/christian.jpg"),
+        "theme_css": cfg.theme_css(site["theme"]),
+        "fonts_url": cfg.fonts_url(site["theme"]),
+        "brand_initials": cfg.initials(prof["name"]),
+        "tel_href": "tel:" + "".join(c for c in prof["phone"] if c.isdigit() or c == "+"),
+    }
 
 
 def csrf_token():
@@ -205,6 +244,87 @@ def delete(item_id):
         save_items(keep)
     flash("Réalisation supprimée.")
     return redirect(url_for("admin"))
+
+
+@app.route("/admin/profil", methods=["GET", "POST"])
+@login_required
+def profile_settings():
+    if request.method == "POST":
+        check_csrf()
+        f = request.form
+        with _lock:
+            data = load_settings(fresh=True)
+            for key in ("name", "phone", "email", "address", "location", "since", "ai_tools"):
+                value = f.get(key, "").strip()[:200]
+                data["profile"][key] = value or cfg.DEFAULTS["profile"][key]
+            for lang in cfg.LANGS:
+                data["texts"][lang] = {}
+                for key, _, _ in cfg.TEXT_FIELDS:
+                    value = f.get(f"text_{lang}_{key}", "").strip()[:2000]
+                    if value:
+                        data["texts"][lang][key] = value
+            th = data["theme"]
+            for key in ("primary", "secondary", "accent", "background"):
+                th[key] = cfg.clean_color(f.get(key), cfg.DEFAULTS["theme"][key])
+            for key in ("font_head", "font_body"):
+                th[key] = f.get(key) if f.get(key) in cfg.FONTS else cfg.DEFAULTS["theme"][key]
+            data["sections"] = {key: bool(f.get(f"section_{key}")) for key, _ in cfg.SECTIONS}
+            save_settings(data)
+        flash("Profil et apparence enregistrés.")
+        return redirect(url_for("profile_settings"))
+    return render_template("profile.html", fonts=cfg.FONTS, langs=cfg.LANGS,
+                           text_fields=cfg.TEXT_FIELDS, sections=cfg.SECTIONS)
+
+
+@app.route("/admin/profil/apparence-defaut", methods=["POST"])
+@login_required
+def reset_theme():
+    check_csrf()
+    with _lock:
+        data = load_settings(fresh=True)
+        data["theme"] = dict(cfg.DEFAULTS["theme"])
+        save_settings(data)
+    flash("Apparence d'origine restaurée.")
+    return redirect(url_for("profile_settings"))
+
+
+@app.route("/admin/photo", methods=["POST"])
+@login_required
+def upload_photo():
+    check_csrf()
+    f = request.files.get("photo")
+    try:
+        img, _ = process_jpeg(f.read() if f else b"")
+    except Exception:
+        flash("Photo refusée (JPEG uniquement).")
+        return redirect(url_for("profile_settings"))
+    img = ImageOps.fit(img, (900, 900), Image.LANCZOS)
+    name = f"profile_{uuid.uuid4().hex}.jpg"
+    storage.put_image(name, jpeg_bytes(img, 88))
+    with _lock:
+        data = load_settings(fresh=True)
+        old = data["profile"].get("photo")
+        data["profile"]["photo"] = name
+        save_settings(data)
+    if old:
+        storage.delete_image(old)
+    flash("Photo de profil mise à jour.")
+    return redirect(url_for("profile_settings"))
+
+
+@app.route("/admin/photo/defaut", methods=["POST"])
+@login_required
+def reset_photo():
+    check_csrf()
+    with _lock:
+        data = load_settings(fresh=True)
+        old = data["profile"].get("photo")
+        data["profile"]["photo"] = ""
+        save_settings(data)
+    if old:
+        storage.delete_image(old)
+    flash("Photo d'origine restaurée.")
+    return redirect(url_for("profile_settings"))
 
 
 @app.route("/api/realisations")

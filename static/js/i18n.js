@@ -311,9 +311,19 @@ window.I18N = {
     return "en";
   }
 
+  var DEFAULT_NAME = "Christian Makuku Valentin";
+
   function t(key, lang) {
-    var dict = window.I18N[lang || window.currentLang] || {};
-    return dict[key] != null ? dict[key] : (window.I18N.fr[key] != null ? window.I18N.fr[key] : null);
+    lang = lang || window.currentLang;
+    var custom = (window.I18N_OVERRIDES || {})[lang] || {};
+    var dict = window.I18N[lang] || {};
+    var value = custom[key] != null ? custom[key]
+      : dict[key] != null ? dict[key]
+      : (window.I18N.fr[key] != null ? window.I18N.fr[key] : null);
+    if (value != null && window.SITE_NAME && window.SITE_NAME !== DEFAULT_NAME) {
+      value = value.split(DEFAULT_NAME).join(window.SITE_NAME);
+    }
+    return value;
   }
 
   function apply(lang) {

@@ -14,6 +14,7 @@
     <div class="container header-inner">
       <a class="brand" href="{{ url_for('index') }}"><span class="brand-mark">CM</span><span class="brand-name">Gestion des réalisations</span></a>
       <div class="admin-actions">
+        <a class="btn btn-primary btn-sm" href="{{ url_for('profile_settings') }}">Mon profil et apparence</a>
         <a class="btn btn-outline btn-sm" href="{{ url_for('realisations') }}" target="_blank" rel="noopener">Voir la page</a>
         <form method="post" action="{{ url_for('logout') }}">
           <input type="hidden" name="csrf" value="{{ csrf_token() }}">

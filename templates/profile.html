@@ -1,0 +1,160 @@
+{% set lang_names = {"fr": "Français", "en": "English", "sw": "Kiswahili"} %}
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Mon profil et apparence</title>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="admin-body">
+  <header class="admin-header">
+    <div class="container header-inner">
+      <a class="brand" href="{{ url_for('admin') }}"><span class="brand-mark">{{ brand_initials }}</span><span class="brand-name">Mon profil et apparence</span></a>
+      <div class="admin-actions">
+        <a class="btn btn-outline btn-sm" href="{{ url_for('admin') }}">Réalisations</a>
+        <a class="btn btn-outline btn-sm" href="{{ url_for('index') }}" target="_blank" rel="noopener">Voir le site</a>
+        <form method="post" action="{{ url_for('logout') }}">
+          <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+          <button class="btn btn-ghost btn-sm" type="submit">Déconnexion</button>
+        </form>
+      </div>
+    </div>
+  </header>
+
+  <main class="container admin-main">
+    {% with msgs = get_flashed_messages() %}{% for m in msgs %}<p class="flash">{{ m }}</p>{% endfor %}{% endwith %}
+
+    <section class="panel">
+      <h2>Photo de profil</h2>
+      <div class="photo-edit">
+        <img src="{{ photo_url }}" alt="{{ profile.name }}" width="140" height="140">
+        <div class="photo-actions">
+          <form method="post" action="{{ url_for('upload_photo') }}" enctype="multipart/form-data" class="upload-form">
+            <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+            <label for="photo">Nouvelle photo (JPEG, recadrée en carré automatiquement)</label>
+            <input id="photo" type="file" name="photo" accept=".jpg,.jpeg,image/jpeg" required>
+            <button class="btn btn-primary btn-sm" type="submit">Changer la photo</button>
+          </form>
+          {% if profile.photo %}
+          <form method="post" action="{{ url_for('reset_photo') }}">
+            <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+            <button class="btn btn-ghost btn-sm" type="submit">Revenir à la photo d'origine</button>
+          </form>
+          {% endif %}
+        </div>
+      </div>
+    </section>
+
+    <form method="post" action="{{ url_for('profile_settings') }}" class="settings-form" id="settingsForm">
+      <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+
+      <section class="panel">
+        <h2>Informations</h2>
+        <div class="upload-form">
+          <div class="form-row">
+            <div><label for="name">Nom complet</label><input id="name" name="name" value="{{ profile.name }}" maxlength="200" required></div>
+            <div><label for="email">E-mail</label><input id="email" type="email" name="email" value="{{ profile.email }}" maxlength="200"></div>
+          </div>
+          <div class="form-row">
+            <div><label for="phone">Téléphone</label><input id="phone" name="phone" value="{{ profile.phone }}" maxlength="200"></div>
+            <div><label for="location">Localisation (section Profil)</label><input id="location" name="location" value="{{ profile.location }}" maxlength="200"></div>
+          </div>
+          <div><label for="address">Adresse (section Contact)</label><input id="address" name="address" value="{{ profile.address }}" maxlength="200"></div>
+          <div class="form-row">
+            <div><label for="since">Année de début d'activité</label><input id="since" name="since" value="{{ profile.since }}" maxlength="20"></div>
+            <div><label for="ai_tools">Nombre d'outils d'IA</label><input id="ai_tools" name="ai_tools" value="{{ profile.ai_tools }}" maxlength="20"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Textes de présentation</h2>
+        <p class="muted">Chaque texte existe en trois langues. Un champ vidé reprend le texte d'origine.</p>
+        <div class="lang-tabs" role="tablist">
+          {% for lang in langs %}<button type="button" class="btn btn-outline btn-sm{{ ' active' if loop.first }}" data-tab="{{ lang }}">{{ lang_names[lang] }}</button>{% endfor %}
+        </div>
+        {% for lang in langs %}
+        <div class="upload-form lang-pane" data-pane="{{ lang }}" {{ '' if loop.first else 'hidden' }}>
+          {% for key, label, long in text_fields %}
+          <div>
+            <label for="t_{{ lang }}_{{ key }}">{{ label }}</label>
+            {% if long %}
+            <textarea id="t_{{ lang }}_{{ key }}" name="text_{{ lang }}_{{ key }}" rows="4" data-lang="{{ lang }}" data-key="{{ key }}">{{ site.texts[lang].get(key, '') }}</textarea>
+            {% else %}
+            <input id="t_{{ lang }}_{{ key }}" name="text_{{ lang }}_{{ key }}" value="{{ site.texts[lang].get(key, '') }}" data-lang="{{ lang }}" data-key="{{ key }}">
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+        {% endfor %}
+      </section>
+
+      <section class="panel">
+        <h2>Apparence</h2>
+        <div class="upload-form">
+          <div class="color-grid">
+            {% for key, label in [("primary", "Couleur principale"), ("secondary", "Couleur secondaire"), ("accent", "Couleur d'accent"), ("background", "Fond de page")] %}
+            <div><label for="{{ key }}">{{ label }}</label><input id="{{ key }}" type="color" name="{{ key }}" value="{{ site.theme[key] }}"></div>
+            {% endfor %}
+          </div>
+          <div class="form-row">
+            {% for key, label in [("font_head", "Police des titres"), ("font_body", "Police du texte")] %}
+            <div>
+              <label for="{{ key }}">{{ label }}</label>
+              <select id="{{ key }}" name="{{ key }}">
+                {% for f in fonts %}<option value="{{ f }}" {{ 'selected' if f == site.theme[key] }}>{{ f }}</option>{% endfor %}
+              </select>
+            </div>
+            {% endfor %}
+          </div>
+          <div>
+            <label>Sections affichées sur la page d'accueil</label>
+            <div class="check-grid">
+              {% for key, label in sections %}
+              <label class="check"><input type="checkbox" name="section_{{ key }}" {{ 'checked' if show[key] }}> {{ label }}</label>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="settings-actions">
+        <button class="btn btn-primary" type="submit">Enregistrer</button>
+      </div>
+    </form>
+
+    <form method="post" action="{{ url_for('reset_theme') }}" onsubmit="return confirm('Revenir aux couleurs et polices d\'origine ?');">
+      <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+      <button class="btn btn-ghost btn-sm" type="submit">Revenir aux couleurs et polices d'origine</button>
+    </form>
+  </main>
+
+  <script src="{{ url_for('static', filename='js/i18n.js') }}"></script>
+  <script>
+    (function () {
+      document.querySelectorAll('[data-key]').forEach(function (el) {
+        if (!el.value) {
+          var dict = window.I18N[el.getAttribute('data-lang')] || {};
+          el.value = dict[el.getAttribute('data-key')] || '';
+          el.setAttribute('data-default', el.value);
+        }
+      });
+      document.getElementById('settingsForm').addEventListener('submit', function () {
+        document.querySelectorAll('[data-default]').forEach(function (el) {
+          if (el.value === el.getAttribute('data-default')) el.value = '';
+        });
+      });
+      document.querySelectorAll('[data-tab]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var lang = btn.getAttribute('data-tab');
+          document.querySelectorAll('[data-tab]').forEach(function (b) { b.classList.toggle('active', b === btn); });
+          document.querySelectorAll('[data-pane]').forEach(function (p) { p.hidden = p.getAttribute('data-pane') !== lang; });
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

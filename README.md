@@ -8,6 +8,7 @@ Site portfolio trilingue (français, anglais, swahili) avec une page **Réalisat
 - Sections : accueil, profil, parcours, intelligence artificielle, compétences, formation, réalisations récentes, contact.
 - Page `/realisations` : galerie avec filtres par catégorie et visionneuse plein écran.
 - Espace `/admin` protégé par mot de passe : envoi de plusieurs JPEG à la fois (glisser-déposer), titre et catégorie, modification et suppression. Les images sont redimensionnées automatiquement (original 2400 px max, miniature 900 px).
+- Page `/admin/profil` (« Mon profil et apparence ») : nom, coordonnées, photo de profil (JPEG), textes de présentation en FR/EN/SW, couleurs, polices et sections affichées. Enregistré dans `data/settings.json`.
 
 ## Lancer en local
 
@@ -40,7 +41,7 @@ Variables d'environnement :
 | `UPLOAD_DIR` | Dossier des images en mode local (par défaut `uploads/`) |
 | `DATA_FILE` | Liste des réalisations en mode local (par défaut `data/realisations.json`) |
 
-Stockage : si `SUPABASE_URL` et `SUPABASE_SERVICE_ROLE_KEY` sont définies, les JPEG et la liste des réalisations (`data/realisations.json`) sont enregistrés dans Supabase Storage, ce qui permet un hébergement sans disque persistant (Render gratuit via `render.yaml`). Sinon, tout est stocké sur le disque local.
+Stockage : si `SUPABASE_URL` et `SUPABASE_SERVICE_ROLE_KEY` sont définies, les JPEG, la liste des réalisations (`data/realisations.json`) et les réglages du profil (`data/settings.json`) sont enregistrés dans Supabase Storage, ce qui permet un hébergement sans disque persistant (par exemple Vercel). Sinon, tout est stocké sur le disque local.
 
 ## Modifier les textes
 

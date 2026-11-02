@@ -3,27 +3,32 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title data-i18n="{% block title_key %}meta.title{% endblock %}">Christian Makuku Valentin</title>
-  <meta name="description" content="Christian Makuku Valentin — Communicateur visuel en art graphique, Brazzaville / Kinshasa.">
+  <title data-i18n="{% block title_key %}meta.title{% endblock %}">{{ profile.name }}</title>
+  <meta name="description" content="{{ profile.name }} — {{ site.texts.fr['hero.role'] or 'Communicateur visuel en art graphique' }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="{{ fonts_url }}" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% if theme_css %}<style>{{ theme_css|safe }}</style>{% endif %}
+  <script>
+    window.SITE_NAME = {{ profile.name|tojson }};
+    window.I18N_OVERRIDES = {{ site.texts|tojson }};
+  </script>
 </head>
 <body data-page="{{ page }}">
   <header class="site-header">
     <div class="container header-inner">
       <a class="brand" href="{{ url_for('index') }}">
-        <span class="brand-mark">CM</span>
-        <span class="brand-name">Christian Makuku</span>
+        <span class="brand-mark">{{ brand_initials }}</span>
+        <span class="brand-name">{{ profile.name.split()[:2]|join(" ") }}</span>
       </a>
       <nav class="nav" id="nav">
-        <a href="{{ url_for('index') }}#profil" data-i18n="nav.about">Profil</a>
-        <a href="{{ url_for('index') }}#parcours" data-i18n="nav.experience">Parcours</a>
-        <a href="{{ url_for('index') }}#competences" data-i18n="nav.skills">Compétences</a>
-        <a href="{{ url_for('index') }}#formation" data-i18n="nav.education">Formation</a>
+        {% if show.profil %}<a href="{{ url_for('index') }}#profil" data-i18n="nav.about">Profil</a>{% endif %}
+        {% if show.parcours %}<a href="{{ url_for('index') }}#parcours" data-i18n="nav.experience">Parcours</a>{% endif %}
+        {% if show.competences %}<a href="{{ url_for('index') }}#competences" data-i18n="nav.skills">Compétences</a>{% endif %}
+        {% if show.formation %}<a href="{{ url_for('index') }}#formation" data-i18n="nav.education">Formation</a>{% endif %}
         <a href="{{ url_for('realisations') }}" class="{{ 'active' if page == 'work' }}" data-i18n="nav.work">Réalisations</a>
-        <a href="{{ url_for('index') }}#contact" class="nav-cta" data-i18n="nav.contact">Contact</a>
+        {% if show.contact %}<a href="{{ url_for('index') }}#contact" class="nav-cta" data-i18n="nav.contact">Contact</a>{% endif %}
       </nav>
       <div class="header-tools">
         <div class="lang-switch" role="group" aria-label="Langue">
@@ -43,14 +48,14 @@
   <footer class="site-footer">
     <div class="container footer-inner">
       <div>
-        <p class="footer-name">Christian Makuku Valentin</p>
+        <p class="footer-name">{{ profile.name }}</p>
         <p class="footer-role" data-i18n="hero.role">Communicateur visuel en art graphique</p>
       </div>
       <div class="footer-links">
-        <a href="mailto:daxcosta244@gmail.com">daxcosta244@gmail.com</a>
-        <a href="tel:+242050109403">+242 05 010 94 03</a>
+        <a href="mailto:{{ profile.email }}">{{ profile.email }}</a>
+        <a href="{{ tel_href }}">{{ profile.phone }}</a>
       </div>
-      <p class="footer-copy">&copy; <span id="year">2026</span> Christian Makuku Valentin. <span data-i18n="footer.rights">Tous droits réservés.</span></p>
+      <p class="footer-copy">&copy; <span id="year">2026</span> {{ profile.name }}. <span data-i18n="footer.rights">Tous droits réservés.</span></p>
     </div>
   </footer>
 

@@ -23,7 +23,7 @@
       {% for it in items %}
       <figure class="tile" data-category="{{ it.category }}" data-full="{{ image_url(it.file) }}" data-title="{{ it.title }}">
         <button type="button" class="tile-btn">
-          <img src="{{ image_url(it.thumb) }}" alt="{{ it.title or 'Christian Makuku Valentin' }}" loading="lazy" width="{{ it.width }}" height="{{ it.height }}">
+          <img src="{{ image_url(it.thumb) }}" alt="{{ it.title or profile.name }}" loading="lazy" width="{{ it.width }}" height="{{ it.height }}">
         </button>
         <figcaption>
           {% if it.title %}<span class="tile-title">{{ it.title }}</span>{% endif %}
