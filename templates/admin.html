@@ -28,7 +28,7 @@
     <section class="panel">
       <h2>Ajouter des conceptions</h2>
       <p class="muted">Format accepté : JPEG (.jpg, .jpeg). Vous pouvez sélectionner plusieurs fichiers à la fois.</p>
-      <form class="upload-form" method="post" action="{{ url_for('upload') }}" enctype="multipart/form-data">
+      <form class="upload-form" id="uploadForm" method="post" action="{{ url_for('upload') }}" enctype="multipart/form-data">
         <input type="hidden" name="csrf" value="{{ csrf_token() }}">
         <label class="dropzone" id="dropzone">
           <input type="file" name="images" id="fileInput" accept=".jpg,.jpeg,image/jpeg" multiple required>
@@ -48,7 +48,7 @@
             </select>
           </div>
         </div>
-        <button class="btn btn-primary" type="submit">Publier</button>
+        <button class="btn btn-primary" type="submit" id="uploadBtn">Publier</button>
       </form>
     </section>
 
@@ -98,6 +98,51 @@
         ev.preventDefault();
         input.files = ev.dataTransfer.files;
         update();
+      });
+
+      var form = document.getElementById('uploadForm');
+      var btn = document.getElementById('uploadBtn');
+      var MAX_BYTES = 4 * 1024 * 1024;
+      var MAX_SIDE = 2400;
+
+      function shrink(file) {
+        if (file.size <= MAX_BYTES || !/jpe?g$/i.test(file.name) || !window.createImageBitmap) {
+          return Promise.resolve(file);
+        }
+        return createImageBitmap(file).then(function (bmp) {
+          var scale = Math.min(1, MAX_SIDE / Math.max(bmp.width, bmp.height));
+          var canvas = document.createElement('canvas');
+          canvas.width = Math.round(bmp.width * scale);
+          canvas.height = Math.round(bmp.height * scale);
+          canvas.getContext('2d').drawImage(bmp, 0, 0, canvas.width, canvas.height);
+          return new Promise(function (resolve) {
+            canvas.toBlob(function (blob) {
+              resolve(blob ? new File([blob], file.name, { type: 'image/jpeg' }) : file);
+            }, 'image/jpeg', 0.9);
+          });
+        }).catch(function () { return file; });
+      }
+
+      form.addEventListener('submit', function (ev) {
+        if (!window.fetch || !input.files.length) return;
+        ev.preventDefault();
+        var files = Array.prototype.slice.call(input.files);
+        var done = 0;
+        btn.disabled = true;
+        function next() {
+          if (!files.length) { location.href = form.action.replace(/\/upload$/, ''); return; }
+          var file = files.shift();
+          btn.textContent = 'Envoi ' + (done + 1) + ' / ' + (done + files.length + 1) + '...';
+          shrink(file).then(function (f) {
+            var data = new FormData();
+            data.append('csrf', form.elements.csrf.value);
+            data.append('title', form.elements.title.value);
+            data.append('category', form.elements.category.value);
+            data.append('images', f, f.name);
+            return fetch(form.action, { method: 'POST', body: data, credentials: 'same-origin' });
+          }).catch(function () {}).then(function () { done++; next(); });
+        }
+        next();
       });
     })();
   </script>
