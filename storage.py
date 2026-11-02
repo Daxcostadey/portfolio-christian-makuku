@@ -60,7 +60,7 @@ class SupabaseStorage:
         if r.status_code not in (200, 201) and "already exists" not in r.text.lower():
             r.raise_for_status()
 
-    def _put(self, name, data, content_type, cache="31536000"):
+    def _put(self, name, data, content_type, cache="3600"):
         r = self.s.post(f"{self.base}/object/{BUCKET}/{name}", data=data, headers={
             "Content-Type": content_type, "x-upsert": "true", "cache-control": cache,
         }, timeout=60)
